@@ -12,12 +12,22 @@
 
 # Retrieve the list of merged PBIT files, exclude those flagged for deletion.
 pbitfiles=$(git diff --diff-filter=d --name-only HEAD@{1} HEAD | grep -e '^.*\.pbit$')
+pbitfiles2 = pbitfiles
 
 # Exit the hook if no PBIT files were merged.
 if [ -z "$pbitfiles" ]
 then
 	exit 0
 fi
+
+# For each file, delete the eventual corresponding PBIT.
+echo "$pbitfiles" |sed -e "s/.pbit$/.pbit/" |while IFS= read -r line
+do 
+	if [ -e "$line" ]
+	then
+		rm "$line"
+	fi
+done
 
 # For each file, delete the eventual corresponding PBIX.
 echo "$pbitfiles" | sed -e "s/.pbit$/.pbix/" | while IFS= read -r line
